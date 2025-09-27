@@ -1,61 +1,29 @@
-# --- Part A: Naming the Workflow ---
-# This name will appear in the "Actions" tab of your GitHub repository.
 name: Send Daily Newsletter
 
-# --- Part B: Defining the Triggers (When to run) ---
-# The "on" section defines what events will cause this workflow to start.
 on:
-  # 1. The Scheduled Trigger
   schedule:
-    # This is a "cron job" schedule. It runs automatically.
-    # The format is: Minute Hour Day(month) Month Day(week)
-    # '30 2 * * *' means "run at 2:30 AM every day".
-    # Since GitHub servers run on UTC time, 2:30 AM UTC is 8:00 AM in India Standard Time (IST).
     - cron: '30 2 * * *'
-
-  # 2. The Manual Trigger
-  # This line adds a "Run workflow" button in the Actions tab.
-  # It's essential for testing your workflow without waiting for the schedule.
   workflow_dispatch:
 
-# --- Part C: Defining the Job (What to do) ---
-# A workflow is made up of one or more "jobs". Our job is to send the email.
 jobs:
-  send-email: # We can name our job anything we like.
-    # This tells GitHub what kind of virtual computer to use.
-    # 'ubuntu-latest' is a standard, reliable choice.
+  send-email:
     runs-on: ubuntu-latest
-
-    # --- Part D: Defining the Steps (The sequence of commands) ---
-    # The "steps" are the individual commands that the virtual computer will run in order.
     steps:
-      # Step 1: Check out the code
-      # This downloads a copy of your repository's code onto the virtual computer.
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up the Node.js environment
-      # This installs Node.js, which is required to run our JavaScript file.
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # We specify a modern, stable version of Node.js.
+          node-version: '18'
 
-      # Step 3: Install our project's dependencies
-      # This runs the "npm install" command, just like you did on your own computer.
-      # It downloads firebase-admin, axios, and @sendgrid/mail.
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run the actual newsletter script!
-      # This is the final and most important command. It executes our script.
       - name: Run newsletter script
         run: node scripts/send-newsletter.js
-        # The "env" block is how we securely pass your secrets from GitHub Settings
-        # to the script. The script can then access them using `process.env.SECRET_NAME`.
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
           SENDGRID_KEY: ${{ secrets.SENDGRID_KEY }}
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
-
