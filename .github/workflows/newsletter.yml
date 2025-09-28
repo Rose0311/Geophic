@@ -27,3 +27,4 @@ jobs:
           NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
           SENDGRID_KEY: ${{ secrets.SENDGRID_KEY }}
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+
