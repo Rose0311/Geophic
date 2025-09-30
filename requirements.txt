@@ -1,0 +1,5 @@
+react-globe.gl 
+axios
+flask
+flask-cors
+google-news-trends-mcp
