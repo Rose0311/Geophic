@@ -11,8 +11,12 @@
     "axios": "^1.12.2",
     "firebase": "^12.3.0",
     "firebase-admin": "^13.5.0",
+    "flatgeobuf": "^4.3.0",
+    "geobuf": "^3.0.2",
+    "pbf": "^4.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-globe.gl": "^2.36.0",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
