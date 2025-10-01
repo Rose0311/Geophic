@@ -1,34 +1,23 @@
 // src/App.js
 
 import React, { useState, useEffect } from "react";
-import { auth } from "./firebase"; // Your firebase.js file
+import { auth } from "./firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import Auth from "./components/Auth";
 import Subscribe from "./components/Subscribe";
+import MyGlobe from "./globe"; // her globe.js is now in src
+import './App.css'; // merged CSS for both apps
 
 function App() {
-  const [user, setUser] = useState(null); // This state will hold the logged-in user object
+  const [user, setUser] = useState(null);
 
-  // This useEffect hook runs once when the component mounts
   useEffect(() => {
-    // onAuthStateChanged returns an unsubscribe function
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // This callback function will be executed whenever the auth state changes
-      if (currentUser) {
-        // User is signed in
-        console.log("User is logged in:", currentUser);
-        setUser(currentUser);
-      } else {
-        // User is signed out
-        console.log("User is logged out");
-        setUser(null);
-      }
+      setUser(currentUser || null);
     });
-
-    // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []); // The empty dependency array ensures this effect runs only once
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -46,17 +35,24 @@ function App() {
       </header>
       <main>
         {user ? (
-          // If user IS logged in, show this content
           <div>
             <h2>Welcome, {user.displayName || user.email}!</h2>
             <p>You can now subscribe to our newsletters.</p>
             <Subscribe />
-            <button onClick={handleLogout} style={{ marginLeft: "10px", backgroundColor: "red", color: "white" }}>
+
+            {/* Globe component directly integrated */}
+            <div className="GlobeContainer">
+              <MyGlobe />
+            </div>
+
+            <button
+              onClick={handleLogout}
+              style={{ marginLeft: "10px", backgroundColor: "red", color: "white" }}
+            >
               Logout
             </button>
           </div>
         ) : (
-          // If user is NOT logged in, show the Auth component
           <Auth />
         )}
       </main>
