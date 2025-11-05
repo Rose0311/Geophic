@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { auth } from "../firebase";
+// 1. Import 'db' from your firebase config file
+import { auth, db } from "../firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+// 2. Import Firestore functions
+import { doc, setDoc } from "firebase/firestore";
 
 export default function Auth() {
   const [firstName, setFirstName] = useState("");
@@ -15,23 +18,42 @@ export default function Auth() {
       if (isLogin) {
         // Login
         await signInWithEmailAndPassword(auth, email, password);
-        alert("Logged in successfully!");
+        console.log("Logged in successfully!"); // Use console.log instead of alert
       } else {
         // Register
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, {
+        const user = userCredential.user;
+        await updateProfile(user, {
           displayName: `${firstName} ${lastName}`,
         });
-        alert("Registered successfully!");
+
+        // 3. Create a user document in Firestore with subscription
+        // This path should match your Firestore rules and app structure
+        // We will use the "users" collection here.
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(userDocRef, {
+          displayName: `${firstName} ${lastName}`,
+          email: user.email,
+          isSubscribed: true // Default new users to subscribed
+        });
+
+        console.log("Registered successfully!"); // Use console.log instead of alert
       }
     } catch (err) {
-      alert(err.message);
+      console.error(err.message); // Use console.error instead of alert
     }
   };
 
+  // Tailwind classes for a professional UI
+  const inputClasses = "w-full px-4 py-3 mb-4 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-gray-200";
+  const buttonClasses = "w-full py-3 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-300";
+  const toggleButtonClasses = "text-blue-500 dark:text-blue-400 hover:underline focus:outline-none font-medium";
+
   return (
-    <div style={{ maxWidth: "400px", margin: "20px auto", padding: "20px", border: "1px solid #ddd", borderRadius: "8px" }}>
-      <h2>{isLogin ? "Login" : "Register"}</h2>
+    <div className="max-w-md mx-auto mt-8 p-8 bg-white dark:bg-gray-800 shadow-2xl rounded-lg">
+      <h2 className="text-3xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+        {isLogin ? "Welcome Back" : "Create Account"}
+      </h2>
 
       <form onSubmit={handleSubmit}>
         {!isLogin && (
@@ -42,7 +64,7 @@ export default function Auth() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               required
-              style={{ display: "block", margin: "8px 0", width: "100%", padding: "8px" }}
+              className={inputClasses}
             />
             <input
               type="text"
@@ -50,7 +72,7 @@ export default function Auth() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               required
-              style={{ display: "block", margin: "8px 0", width: "100%", padding: "8px" }}
+              className={inputClasses}
             />
           </>
         )}
@@ -61,7 +83,7 @@ export default function Auth() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={{ display: "block", margin: "8px 0", width: "100%", padding: "8px" }}
+          className={inputClasses}
         />
 
         <input
@@ -70,26 +92,26 @@ export default function Auth() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={{ display: "block", margin: "8px 0", width: "100%", padding: "8px" }}
+          className={inputClasses}
         />
 
-        <button type="submit" style={{ marginTop: "10px", padding: "10px", width: "100%", cursor: "pointer" }}>
+        <button type="submit" className={buttonClasses}>
           {isLogin ? "Login" : "Register"}
         </button>
       </form>
 
-      <p style={{ marginTop: "15px", textAlign: "center" }}>
+      <p className="mt-6 text-center text-gray-600 dark:text-gray-400">
         {isLogin ? (
           <>
             New user?{" "}
-            <button onClick={() => setIsLogin(false)} style={{ background: "none", border: "none", color: "blue", cursor: "pointer" }}>
+            <button onClick={() => setIsLogin(false)} className={toggleButtonClasses}>
               Register here
             </button>
           </>
         ) : (
           <>
             Already have an account?{" "}
-            <button onClick={() => setIsLogin(true)} style={{ background: "none", border: "none", color: "blue", cursor: "pointer" }}>
+            <button onClick={() => setIsLogin(true)} className={toggleButtonClasses}>
               Login here
             </button>
           </>
@@ -98,3 +120,4 @@ export default function Auth() {
     </div>
   );
 }
+
