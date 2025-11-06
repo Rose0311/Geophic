@@ -42,6 +42,7 @@ function App() {
 
             {/* Globe component directly integrated */}
             <div className="GlobeContainer">
+            
               <MyGlobe />
             </div>
 
