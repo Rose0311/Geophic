@@ -36,3 +36,64 @@
     transform: rotate(360deg);
   }
 }
+/* 🌌 Animated Starfield Background */
+.starfield {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.starfield span {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: starAnim linear infinite;
+}
+
+@keyframes starAnim {
+  0% {
+    transform: translateZ(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateZ(300px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.globe-spinner {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid rgba(0,255,255,0.3);
+  border-top-color: #00FFE5;
+  animation: spin 1.2s linear infinite, glow 2s ease-in-out infinite;
+  position: relative;
+}
+
+.globe-spinner::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border-radius: 50%;
+  border: 2px dashed rgba(0,255,255,0.5);
+  animation: spin 2s linear infinite reverse;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes glow {
+  0% { box-shadow: 0 0 10px #00FFE5; }
+  50% { box-shadow: 0 0 25px #00FFE5; }
+  100% { box-shadow: 0 0 10px #00FFE5; }
+}
