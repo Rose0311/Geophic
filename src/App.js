@@ -1,12 +1,12 @@
 // src/App.js
 
 import React, { useState, useEffect } from "react";
-import { auth } from "./firebase";
+import { auth } from "./firebase"; // Assuming you have firebase setup
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-import Auth from "./components/Auth";
-import Subscribe from "./components/Subscribe";
-import MyGlobe from "./globe";
+import Auth from "./components/Auth"; // Assuming you have this component
+import Subscribe from "./components/Subscribe"; // Assuming you have this component
+import MyGlobe from "./globe"; // Your main globe component
 import "./App.css";
 
 function App() {
@@ -43,8 +43,10 @@ function App() {
 
   return (
     <div className="App" style={{ width: "100vw", height: "100vh", position: "relative" }}>
+      {/* Renders the main Globe component */}
       <MyGlobe />
 
+      {/* Login/Subscribe Overlay - Styled to contrast with the new dark UI */}
       <div
         style={{
           position: "absolute",
@@ -54,8 +56,9 @@ function App() {
           padding: "10px",
           borderRadius: "10px",
           backdropFilter: "blur(12px)",
-          background: "rgba(255,255,255,0.2)",
-          boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+          // Adjusted background for better visibility on a dark theme
+          background: "rgba(37,42,65,0.75)", 
+          boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
           width: "280px",
         }}
       >
@@ -95,17 +98,20 @@ const buttonStyle = {
   padding: "10px 15px",
   border: "none",
   background: "transparent",
-  color: "white",
+  color: "white", // Set text color to white for visibility on dark overlay
   fontSize: "16px",
   cursor: "pointer",
   textAlign: "left",
   fontWeight: "500",
   letterSpacing: "0.5px",
   backdropFilter: "blur(5px)",
+  // Optional hover effect for better UX
+  transition: 'background-color 0.2s',
 };
 
 const cardStyle = {
-  background: "rgba(255,255,255,0.85)",
+  // Adjusted background to be slightly opaque and lighter for form content
+  background: "rgba(255,255,255,0.95)", 
   borderRadius: "8px",
   padding: "12px",
   boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
