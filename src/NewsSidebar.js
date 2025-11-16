@@ -30,6 +30,7 @@ const NewsSidebar = ({
   sidebarCountry,
   countryNews,
   isLoadingNews,
+  onSummaryClick, // ⚡ NEW PROP
 }) => {
   
   const handleCategoryClick = (categoryName) => {
@@ -120,7 +121,6 @@ const NewsSidebar = ({
               >
                 <span style={{ marginRight: '6px' }}>{getCategoryIcon(cat)}</span>
                 {cat}
-                {/* ⚡ THE COUNT BADGE IS REMOVED HERE */}
               </button>
             );
           })}
@@ -141,8 +141,7 @@ const NewsSidebar = ({
             backgroundColor: '#4D96FF', 
             marginRight: '5px' 
           }}></span>
-          {/* Note: Kept the "10 total news" text below the map title as seen in the original image */}
-          10 total news 
+           news 
         </span>
       </div>
       
@@ -157,19 +156,63 @@ const NewsSidebar = ({
         <ul style={{ padding: 0, listStyle: 'none' }}>
           {countryNews.length > 0 ? (
             countryNews.map((newsItem, idx) => (
-              <li key={idx} style={{ marginBottom: "15px", background: '#3c415e', padding: '12px', borderRadius: '6px' }}>
-                {newsItem.url ? (
-                  <a href={newsItem.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#4D96FF' }}>
-                    <strong style={{ display: 'block' }}>{newsItem.title}</strong>
-                  </a>
-                ) : (
-                  <strong style={{ color: newsItem.title.startsWith("Error:") ? '#FF6B6B' : '#fff' }}>{newsItem.title}</strong>
-                )}
-                {(newsItem.source || newsItem.published) && (
-                  <small style={{ color: '#aaa', display: 'block', marginTop: '5px' }}>
-                    {newsItem.source && `Source: ${newsItem.source} `}
-                    {newsItem.published && `| Published: ${newsItem.published}`}
-                  </small>
+              <li key={idx} style={{ 
+                marginBottom: "15px", 
+                background: '#3c415e', 
+                padding: '12px', 
+                borderRadius: '6px',
+                // ⚡ ADD FLEX LAYOUT
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: '10px'
+              }}>
+                {/* ⚡ WRAP EXISTING CONTENT IN DIV */}
+                <div style={{ flex: 1 }}>
+                  {newsItem.url ? (
+                    <a href={newsItem.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#4D96FF' }}>
+                      <strong style={{ display: 'block' }}>{newsItem.title}</strong>
+                    </a>
+                  ) : (
+                    <strong style={{ color: newsItem.title.startsWith("Error:") ? '#FF6B6B' : '#fff' }}>{newsItem.title}</strong>
+                  )}
+                  {(newsItem.source || newsItem.published) && (
+                    <small style={{ color: '#aaa', display: 'block', marginTop: '5px' }}>
+                      {newsItem.source && `Source: ${newsItem.source} `}
+                      {newsItem.published && `| Published: ${newsItem.published}`}
+                    </small>
+                  )}
+                </div>
+
+                {/* ⚡ ADD SUMMARY BUTTON */}
+                {newsItem.url && (
+                  <button
+                    onClick={() => onSummaryClick(newsItem.url, newsItem.title)}
+                    style={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      transition: 'all 0.3s ease',
+                      whiteSpace: 'nowrap',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      flexShrink: 0
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                    }}
+                  >
+                    📝
+                  </button>
                 )}
               </li>
             ))
