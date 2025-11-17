@@ -1,2 +1,2 @@
 # Geophic
-Interactive new delivery webapp
+added filters, category wise news filtration 
