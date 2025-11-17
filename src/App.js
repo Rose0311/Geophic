@@ -33,84 +33,82 @@ function App() {
 
   const toggleAuth = () => {
     setShowAuth((prev) => !prev);
-    setShowSubscribe(false);
+    setShowSubscribe(false); // close subscribe if open
   };
 
   const toggleSubscribe = () => {
     setShowSubscribe((prev) => !prev);
-    setShowAuth(false);
+    setShowAuth(false); // close auth if open
   };
 
   return (
-    <div className="App" style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      <MyGlobe />
+      <div className="App" style={{ width: "100vw", height: "100vh", position: "relative" }}>
+        <MyGlobe />
 
-      {/* ⚡ CHANGE: Changed 'right: "20px"' to 'left: "20px"' */}
-      <div
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px", // <--- UPDATED POSITION
-          zIndex: 100,
-          padding: "10px",
-          borderRadius: "10px",
-          backdropFilter: "blur(12px)",
-          background: "rgba(37,42,65,0.75)", 
-          boxShadow: "0 4px 15px rgba(0,0,0,0.5)",
-          width: "280px",
-        }}
-      >
-        {user ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <button
-              onClick={toggleSubscribe}
-              style={buttonStyle}
-            >
-              {showSubscribe ? "✖ Close Subscribe" : "📩 Subscribe"}
-            </button>
+        <div
+          style={{
+            position: "absolute",
+            top: "20px",
+            left: "20px", // ✅ Changed from right to left
+            zIndex: 100,
+            padding: "10px",
+            borderRadius: "10px",
+            backdropFilter: "blur(12px)",
+            background: "rgba(255,255,255,0.2)",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+            width: "280px",
+          }}
+        >
+          {user ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button
+                onClick={toggleSubscribe}
+                style={buttonStyle}
+              >
+                {showSubscribe ? "✖ Close Subscribe" : "📩 Subscribe"}
+              </button>
 
-            {showSubscribe && (
-              <div style={cardStyle}>
-                <Subscribe />
-              </div>
-            )}
+              {showSubscribe && (
+                <div style={cardStyle}>
+                  <Subscribe />
+                </div>
+              )}
 
-            <button onClick={handleLogout} style={{ ...buttonStyle, color: "#ff4b4b" }}>
-              🚪 Logout
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <button onClick={toggleAuth} style={buttonStyle}>
-              {showAuth ? "✖ Close Login" : "🔑 Login / Signup"}
-            </button>
-            {showAuth && <div style={cardStyle}><Auth /></div>}
-          </div>
-        )}
+              <button onClick={handleLogout} style={{ ...buttonStyle, color: "#ff4b4b" }}>
+                🚪 Logout
+              </button>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <button onClick={toggleAuth} style={buttonStyle}>
+                {showAuth ? "✖ Close Login" : "🔑 Login / Signup"}
+              </button>
+              {showAuth && <div style={cardStyle}><Auth /></div>}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-const buttonStyle = {
-  padding: "10px 15px",
-  border: "none",
-  background: "transparent",
-  color: "white",
-  fontSize: "16px",
-  cursor: "pointer",
-  textAlign: "left",
-  fontWeight: "500",
-  letterSpacing: "0.5px",
-  backdropFilter: "blur(5px)",
-  transition: 'background-color 0.2s',
-};
+  const buttonStyle = {
+    padding: "10px 15px",
+    border: "none",
+    background: "transparent",
+    color: "white",
+    fontSize: "16px",
+    cursor: "pointer",
+    textAlign: "left",
+    fontWeight: "500",
+    letterSpacing: "0.5px",
+    backdropFilter: "blur(5px)",
+  };
 
-const cardStyle = {
-  background: "rgba(255,255,255,0.95)", 
-  borderRadius: "8px",
-  padding: "12px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-};
+  const cardStyle = {
+    background: "rgba(255,255,255,0.85)",
+    borderRadius: "8px",
+    padding: "12px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  };
 
 export default App;

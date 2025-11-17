@@ -26,24 +26,37 @@ const NewsSidebar = ({
   categories, 
   categoryFilter, 
   setCategoryFilter,
-  onClose,
+  onClose,           
+  onToggle,          
+  isVisible,
+  fetchNews,
   sidebarCountry,
   countryNews,
   isLoadingNews,
-  onSummaryClick, // ⚡ NEW PROP
+  onSummaryClick, 
 }) => {
   
+  // const handleCategoryClick = (categoryName) => {
+  // const filterValue = getFilterValue(categoryName);
+  // setCategoryFilter(filterValue);
+  // };
+
   const handleCategoryClick = (categoryName) => {
-    const filterValue = getFilterValue(categoryName);
-    setCategoryFilter(filterValue);
-  };
+  const filterValue = getFilterValue(categoryName);
+  setCategoryFilter(filterValue);
+  
+  // ⚡ FIX: Actually fetch news when category changes!
+  if (sidebarCountry) {
+    fetchNews(sidebarCountry, filterValue);
+  }
+};
 
   return (
     <div style={{
       // Full overlay container style
       position: 'absolute',
       top: 0,
-      right: 0,
+      right: isVisible ? '0' : '-450px',
       width: '350px',
       height: '100vh',
       background: '#1c2132', 
@@ -141,7 +154,7 @@ const NewsSidebar = ({
             backgroundColor: '#4D96FF', 
             marginRight: '5px' 
           }}></span>
-           news 
+          {countryNews.length} total news  {/* ⚡ CHANGED TO DYNAMIC COUNT */}
         </span>
       </div>
       

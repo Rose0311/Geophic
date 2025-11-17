@@ -6,22 +6,30 @@ import NewsSidebar from "./NewsSidebar";
 
 function MyGlobe() {
   const [data, setData] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true); // Start visible
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Keep for news loading logic
+
+
   const [sidebarCountry, setSidebarCountry] = useState("");
   const [countryNews, setCountryNews] = useState([]);
   const [isLoadingNews, setIsLoadingNews] = useState(false);
-  // ⚡ NEW STATES FOR SEARCH FUNCTIONALITY
+  //FOR SEARCH FUNCTIONALITY
   const [searchText, setSearchText] = useState("");
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [selectedFeatureId, setSelectedFeatureId] = useState(null);
   const globeRef = useRef(); // Add this ref
   
-  // ⚡ NEW STATE FOR CATEGORY FILTER
+  //FOR CATEGORY FILTER
   const [categoryFilter, setCategoryFilter] = useState("general");
-  // ⚡ CATEGORY DEFINITION
+  //CATEGORY DEFINITION
   const categories = ["All News", "Technology", "Sports", "Entertainment", "Business", "Politics", "Health"];
+
+  const [loading, setLoading] = useState(true);
+  const [soundOn, setSoundOn] = useState(false);
+  const [startGlobe, setStartGlobe] = useState(false);
   
-  // ⚡ NEW STATES FOR SUMMARY SIDEBAR
+  //FOR SUMMARY SIDEBAR
   const [summarySidebarOpen, setSummarySidebarOpen] = useState(false);
   const [currentSummary, setCurrentSummary] = useState({
     title: '',
@@ -29,6 +37,9 @@ function MyGlobe() {
     loading: false,
     error: null
   });
+
+  const audioRef = useRef(null);
+  const starsRef = useRef([]);
    
   
 
@@ -43,16 +54,50 @@ function MyGlobe() {
     "#C77DFF"  // lavender violet
   ];
 
-
+  useEffect(() => {
+    starsRef.current = Array.from({ length: 200 }).map((_, i) => ({
+      id: i,
+      top: Math.random() * 100 + "%",
+      left: Math.random() * 100 + "%",
+      duration: 2 + Math.random() * 3 + "s",
+      delay: Math.random() * 5 + "s",
+    }));
+  }, []);
   // ⚡ SEARCH HELPER FUNCTIONS
 
     
+  // useEffect(() => {
+  //   fetch("/countries.geojson")
+  //     .then((res) => res.json())
+  //     .then((geojson) => {
+  //       if (!geojson.features) {
+  //         console.error("Invalid GeoJSON structure");
+  //         return;
+  //       }
+  //       const augmented = geojson.features.map((f, idx) => ({
+  //         ...f,
+  //         properties: {
+  //           ...f.properties,
+  //           color: colorMap[idx % colorMap.length],
+  //         },
+  //       }));
+  //       setData(augmented);
+  //     })
+  //     .catch((e) => console.error("Fetch geojson error: ", e));
+  // }, []);
+
+
+
+  // ⭐ This will run only after globe begins loading
   useEffect(() => {
+    if (!startGlobe) return;
+
     fetch("/countries.geojson")
       .then((res) => res.json())
       .then((geojson) => {
         if (!geojson.features) {
           console.error("Invalid GeoJSON structure");
+          setLoading(false);
           return;
         }
         const augmented = geojson.features.map((f, idx) => ({
@@ -63,9 +108,16 @@ function MyGlobe() {
           },
         }));
         setData(augmented);
+
+        setTimeout(() => setLoading(false), 1200);
       })
-      .catch((e) => console.error("Fetch geojson error: ", e));
-  }, []);
+      .catch((e) => {
+        console.error("Fetch geojson error: ", e);
+        setLoading(false);
+      });
+  }, [startGlobe]); // Remove colorMap from dependencies if it's constant
+
+
 
   // ⚡ REUSABLE FETCH FUNCTION (Now accepts an optional category)
   const fetchNews = (country, category = categoryFilter) => {
@@ -73,6 +125,7 @@ function MyGlobe() {
       setSidebarOpen(true);
       setCountryNews([]);
       setIsLoadingNews(true);
+      setSidebarVisible(true); //side bar to be shown when the news is being fetched
   
       if (country === "Unknown") {
           setCountryNews([{ title: "Country name not found in data." }]);
@@ -104,6 +157,47 @@ function MyGlobe() {
               setIsLoadingNews(false);
           });
   };
+
+
+
+   // ⭐ Optimized sound toggle — starts sound BEFORE globe loads
+  const toggleSound = () => {
+    if (!audioRef.current) return;
+
+    if (soundOn) {
+      // Fade out
+      let v = audioRef.current.volume;
+      const fadeOut = setInterval(() => {
+        if (v > 0.05) {
+          v -= 0.05;
+          audioRef.current.volume = v;
+        } else {
+          clearInterval(fadeOut);
+          audioRef.current.pause();
+          setSoundOn(false);
+        }
+      }, 30);
+    } 
+    else {
+      audioRef.current.volume = 0.4;
+
+      const p = audioRef.current.play();
+
+      if (p) {
+        p.then(() => {
+          setSoundOn(true);
+
+          // ⭐ Delay globe load so sound starts immediately
+          setTimeout(() => setStartGlobe(true), 150);
+
+        }).catch(() => {
+          console.log("Audio blocked");
+          setSoundOn(false);
+        });
+      }
+    }
+  };
+
 
   // ⚡ NEW FUNCTION TO HANDLE SUMMARY CLICK
   const handleSummaryClick = async (url, title) => {
@@ -342,11 +436,38 @@ function MyGlobe() {
   const polygonAltitude = (feature) => (feature.id === selectedFeatureId ? 0.06 : 0.01);
   const polygonStrokeColor = (feature) => (feature.id === selectedFeatureId ? "#333" : "#111");
 
-    if (data.length === 0) return <div>Loading country globe...</div>;
+    // if (data.length === 0) return <div>Loading country globe...</div>;
 
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative", background: '#0a0d16' }}>
-      {/* ⚡ SEARCH UI COMPONENT - ADD THIS */}
+
+    <audio ref={audioRef} loop>
+      <source src="/sounds/space-hum.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button
+      onClick={toggleSound}
+      style={{
+        position: "absolute",
+        bottom: "20px",
+        left: "20px",
+        zIndex: 100000,
+        fontSize: "22px",
+        padding: "6px 10px",
+        background: "rgba(0,0,0,0.55)",
+        border: "1px solid #00ffe5",
+        borderRadius: "8px",
+        color: "#00ffe5",
+        cursor: "pointer"
+      }}
+    >
+      {soundOn ? "🔊" : "🔇"}
+    </button>
+
+    
+     
+      
+      {/*SEARCH UI COMPONENT - ADD THIS */}
     <div
       style={{
         position: "absolute",
@@ -418,6 +539,7 @@ function MyGlobe() {
         </button>
       </div>
 
+
       {/* Dropdown suggestions */}
       {suggestionsOpen && suggestions.length > 0 && (
         <ul
@@ -454,7 +576,9 @@ function MyGlobe() {
       )}
     </div>
 
-      <Globe
+      
+
+      {/* <Globe
         ref={globeRef} // Add this ref
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         polygonsData={data}
@@ -472,7 +596,31 @@ function MyGlobe() {
         pointLightIntensity={1.5}
         width={window.innerWidth}
         height={window.innerHeight}
-      />
+      /> */}
+
+
+      {/* 🌍 GLOBE — loads only after audio begins */}
+      {startGlobe && (
+        <Globe
+          ref={globeRef}
+          globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+          polygonsData={data}
+          polygonCapColor={polygonCapColor}
+          polygonSideColor={() => "rgba(0,100,0,0.15)"}
+          polygonStrokeColor={polygonStrokeColor}
+          polygonAltitude={polygonAltitude}
+          polygonLabel={(feature) =>
+            `<b>${feature.properties.ADMIN || feature.properties.name || feature.properties.COUNTRY || "Unknown"}</b><br/>Click for news`
+          }
+          onPolygonClick={handlePolygonClick}
+          ambientLightColor="white"
+          ambientLightIntensity={3}
+          pointLightColor="white"
+          pointLightIntensity={1.5}
+          width={window.innerWidth}
+          height={window.innerHeight}
+        />
+      )}
       
       {/* ⚡ INTEGRATE NewsSidebar WITH onSummaryClick */}
       {sidebarOpen && (
@@ -482,19 +630,22 @@ function MyGlobe() {
           categoryFilter={categoryFilter}
           setCategoryFilter={setCategoryFilter}
           fetchNews={fetchNews}
-          onClose={() => setSidebarOpen(false)}
+          // onClose={() => setSidebarOpen(false)}
+          onClose={() => setSidebarVisible(false)} //Changed to hide instead of close
+          onToggle={() => setSidebarVisible(!sidebarVisible)} //Add toggle prop
           
           // News Data
           sidebarCountry={sidebarCountry}
           countryNews={countryNews}
           isLoadingNews={isLoadingNews}
 
-          // ⚡ NEW PROP FOR SUMMARY
+          //FOR SUMMARY
           onSummaryClick={handleSummaryClick}
+          isVisible={sidebarVisible}
         />
       )}
 
-      {/* ⚡ SUMMARY SIDEBAR - LEFT SIDE */}
+      {/*SUMMARY SIDEBAR - LEFT SIDE */}
       <div style={{
         position: 'fixed',
         top: '0',
@@ -634,13 +785,108 @@ function MyGlobe() {
         />
       )}
 
+
+
+      {/* 🚀 LOADING OVERLAY */}
+      {loading && (
+        <div
+          style={{
+            pointerEvents: "none",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            background: "rgba(0,0,0,0.85)",
+            zIndex: 9999,
+            color: "#00FFE5"
+          }}
+        >
+          <div className="starfield">
+            {starsRef.current.map((s) => (
+              <span
+                key={s.id}
+                style={{
+                  position: "absolute",
+                  width: "2px",
+                  height: "2px",
+                  background: "#00FFE5",
+                  borderRadius: "50%",
+                  animation: "twinkle linear infinite",
+                  top: s.top,
+                  left: s.left,
+                  animationDuration: s.duration,
+                  animationDelay: s.delay
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="globe-spinner" 
+            style={{
+              width: "60px",
+              height: "60px",
+              border: "4px solid rgba(0, 255, 229, 0.3)",
+              borderTop: "4px solid #00FFE5",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }} 
+          />
+          <h2 style={{ marginTop: "20px", fontFamily: "Arial, sans-serif" }}>Initializing Universe...</h2>
+        </div>
+      )}
+      
+    {/* 🔄 SIDEBAR TOGGLE BUTTON */}
+      {/* 🔄 SIDEBAR TOGGLE BUTTON - HIDES WHEN SIDEBAR OPEN */}
+        {!sidebarVisible && (
+          <button
+            onClick={() => setSidebarVisible(!sidebarVisible)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              zIndex: 100000,
+              fontSize: "22px",
+              padding: "8px 12px",
+              background: "rgba(0,0,0,0.55)",
+              border: "1px solid #4D96FF",
+              borderRadius: "8px",
+              color: "#4D96FF",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              backdropFilter: "blur(6px)"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = "rgba(77, 150, 255, 0.2)";
+              e.target.style.transform = "scale(1.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = "rgba(0,0,0,0.55)";
+              e.target.style.transform = "scale(1)";
+            }}
+          >
+            ▶
+          </button>
+        )}
+
       {/* CSS Animation for spinner */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
+        }
       `}</style>
+
+
     </div>
   );
 }
