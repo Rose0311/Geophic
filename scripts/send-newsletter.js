@@ -28,16 +28,16 @@ const sendDailyNewsletter = async () => {
     const newsResponse = await axios.get(
       `https://newsapi.org/v2/top-headlines?country=in&pageSize=1&apiKey=${NEWS_API_KEY}`
     );
+
     const article = newsResponse.data.articles[0];
     const headline = article ? article.title : "Check Out the Latest World News!";
-    const articleUrl = article ? article.url : "https://news.google.com/";
     console.log(`Fetched headline: ${headline}`);
 
     // 2. Get a Random Quote
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     console.log(`Selected quote: ${randomQuote}`);
 
-    // ⭐⭐⭐ 3. NEW: Fetch ONLY subscribed users from Firestore ⭐⭐⭐
+    // ⭐⭐⭐ 3. Fetch ONLY subscribed users from Firestore ⭐⭐⭐
     console.log("Fetching subscribed users...");
     const snap = await db.collection("subscribers").get();
     const allEmails = snap.docs
@@ -52,6 +52,7 @@ const sendDailyNewsletter = async () => {
     console.log(`📧 Found ${allEmails.length} subscribed users.`);
 
     // 4. Build and Send the Email
+    // NOTE: Link now always redirects to your Netlify site.
     const msg = {
       to: allEmails,
       from: SENDER_EMAIL,
@@ -59,16 +60,21 @@ const sendDailyNewsletter = async () => {
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h2>Here's Your Daily Headline!</h2>
+
           <p style="font-size: 18px; font-weight: bold;">${headline}</p>
-          <p>Read the full story to learn more.</p>
-          <a href="${articleUrl}" style="display: inline-block; padding: 10px 15px; background-color: #007bff; color: #fff; text-decoration: none; border-radius: 5px;">
-            Read More
+
+          <p>Click below to open Geophic:</p>
+
+          <a href="https://rainbow-conkies-a345f6.netlify.app/" 
+             style="display: inline-block; padding: 10px 15px; background-color: #007bff; color: #fff; 
+                    text-decoration: none; border-radius: 5px;">
+             Open Geophic
           </a>
         </div>
       `,
     };
 
-    await sgMail.sendMultiple(msg); // ⭐ Use sendMultiple for arrays
+    await sgMail.sendMultiple(msg); // Sending email to all recipients
     console.log("✅ Newsletter sent successfully!");
 
   } catch (error) {
