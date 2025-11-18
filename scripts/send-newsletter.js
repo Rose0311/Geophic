@@ -51,30 +51,36 @@ const sendDailyNewsletter = async () => {
 
     console.log(`📧 Found ${allEmails.length} subscribed users.`);
 
-    // 4. Build and Send the Email
-    // NOTE: Link now always redirects to your Netlify site.
+    // --- FIX: TURN OFF SENDGRID CLICK TRACKING ---
     const msg = {
       to: allEmails,
       from: SENDER_EMAIL,
       subject: `🌐 Your Daily Globe Update: ${randomQuote}`,
+
+      // VERY IMPORTANT → prevents broken links caused by SendGrid wrapping
+      trackingSettings: {
+        clickTracking: { enable: false, enableText: false },
+      },
+
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
           <h2>Here's Your Daily Headline!</h2>
 
           <p style="font-size: 18px; font-weight: bold;">${headline}</p>
 
-          <p>Click below to open Geophic:</p>
+          <p>Click the button below to open Geophic:</p>
 
-          <a href="https://rainbow-conkies-a345f6.netlify.app/" 
-             style="display: inline-block; padding: 10px 15px; background-color: #007bff; color: #fff; 
-                    text-decoration: none; border-radius: 5px;">
+          <a href="https://rainbow-conkies-a345f6.netlify.app"
+             target="_blank"
+             style="display: inline-block; padding: 10px 15px; background-color: #007bff;
+                    color: #fff; text-decoration: none; border-radius: 5px;">
              Open Geophic
           </a>
         </div>
       `,
     };
 
-    await sgMail.sendMultiple(msg); // Sending email to all recipients
+    await sgMail.sendMultiple(msg);
     console.log("✅ Newsletter sent successfully!");
 
   } catch (error) {
